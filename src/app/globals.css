@@ -1,0 +1,573 @@
+@import "tailwindcss";
+
+@custom-variant tall (@media (min-height: 44rem));
+
+/* ───────────────────────────── Design tokens ───────────────────────────── */
+
+@theme {
+  /* Color */
+  --color-ink: #070b08;
+  --color-ink-2: #0b120d;
+  --color-moss: #0f1a12;
+  --color-moss-2: #152219;
+  --color-text: #eef3ea;
+  --color-muted: #a9b6ab; /* 9.6:1 on ink */
+  --color-faint: #86948a; /* 6.1:1 on ink */
+  --color-lime: #c6f432;
+  --color-lime-deep: #8fb81a;
+  --color-coral: #ff5a36;
+  --color-limestone: #efe7d6;
+  --color-limestone-ink: #1b1813;
+  --color-line: rgb(214 245 214 / 0.1);
+  --color-line-strong: rgb(214 245 214 / 0.18);
+
+  /* Type */
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: var(--font-instrument), ui-serif, Georgia, "Times New Roman", serif;
+
+  --text-label: 0.8125rem;
+  --text-label--line-height: 1.3;
+  --text-body: 1rem;
+  --text-body--line-height: 1.6;
+  --text-lead: clamp(1.125rem, 1rem + 0.45vw, 1.375rem);
+  --text-lead--line-height: 1.5;
+  --text-h3: clamp(1.5rem, 1.1rem + 1.4vw, 2.25rem);
+  --text-h3--line-height: 1.1;
+  --text-h2: clamp(2.5rem, 1.3rem + 5vw, 6.25rem);
+  --text-h2--line-height: 0.95;
+  --text-display: clamp(3.5rem, 1rem + 12vw, 13rem);
+  --text-display--line-height: 0.86;
+
+  /* Radii */
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+
+  /* Shadows */
+  --shadow-glass: inset 0 1px 0 rgb(255 255 255 / 0.07), 0 24px 60px -24px rgb(0 0 0 / 0.65);
+  --shadow-lift: inset 0 1px 0 rgb(255 255 255 / 0.09), 0 40px 90px -30px rgb(0 0 0 / 0.8);
+  --shadow-glow: 0 0 0 1px rgb(198 244 50 / 0.35), 0 10px 40px -10px rgb(198 244 50 / 0.45);
+
+  /* Motion: one easing family, one duration scale */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.76, 0, 0.24, 1);
+  --duration-1: 200ms;
+  --duration-2: 450ms;
+  --duration-3: 800ms;
+  --duration-4: 1200ms;
+
+  --breakpoint-xs: 26.875rem; /* 430px */
+}
+
+:root {
+  --gutter: clamp(1.25rem, 5vw, 3rem);
+  --section-y: clamp(6rem, 4rem + 8vw, 11rem);
+  --nav-h: 4.5rem;
+  --container: 92rem;
+  /* Left/right edge of the centred container, for full-bleed rows that must align with it. */
+  --edge: max(var(--gutter), calc((100vw - var(--container)) / 2 + var(--gutter)));
+  color-scheme: dark;
+}
+
+/* ───────────────────────────── Base ───────────────────────────── */
+
+@layer base {
+  html {
+    scroll-padding-top: calc(var(--nav-h) + 1.5rem);
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+
+  html:not(.lenis) {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: var(--color-ink);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: 1.6;
+    overflow-x: clip;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+    overflow-wrap: break-word;
+  }
+
+  p {
+    text-wrap: pretty;
+    overflow-wrap: break-word;
+  }
+
+  ::selection {
+    background: var(--color-lime);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-lime);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+
+  img,
+  svg,
+  video,
+  canvas {
+    display: block;
+    max-width: 100%;
+  }
+}
+
+/* Lenis */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: clip;
+}
+
+/* ───────────────────────────── Utilities ───────────────────────────── */
+
+@utility container-x {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-left: max(var(--gutter), env(safe-area-inset-left));
+  padding-right: max(var(--gutter), env(safe-area-inset-right));
+}
+
+@utility section-y {
+  padding-block: var(--section-y);
+}
+
+@utility glass {
+  /* Touch devices get a denser tint instead of a live blur: same read, far
+     cheaper to composite on mobile GPUs. */
+  background: linear-gradient(160deg, rgb(26 39 29 / 0.86), rgb(12 19 14 / 0.84));
+  border: 1px solid var(--color-line-strong);
+  box-shadow: var(--shadow-glass);
+
+  @media (hover: hover) and (pointer: fine) {
+    background: linear-gradient(160deg, rgb(28 42 31 / 0.62), rgb(12 19 14 / 0.58));
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
+    backdrop-filter: blur(18px) saturate(150%);
+  }
+}
+
+@utility eyebrow {
+  font-size: var(--text-label);
+  line-height: 1.3;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--color-muted);
+}
+
+@utility serif-accent {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Film grain over everything — tiny inline SVG, no request. */
+/* Normal blending on purpose: a page-wide blend mode is costly to composite. */
+.grain {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  opacity: 0.035;
+  background-image: url("/images/grain.webp");
+  background-size: 128px;
+}
+
+/* ───────────────────────────── Preloader (CSS-only) ───────────────────────────── */
+
+@property --load {
+  syntax: "<integer>";
+  inherits: false;
+  initial-value: 0;
+}
+
+.preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: end start;
+  padding: max(var(--gutter), env(safe-area-inset-left));
+  padding-bottom: max(2.5rem, env(safe-area-inset-bottom));
+  background: var(--color-ink);
+  pointer-events: none;
+  animation: preloader-out 0.6s var(--ease-in-out) 0.85s forwards;
+}
+
+.preloader__count {
+  font-size: clamp(4rem, 3rem + 8vw, 10rem);
+  line-height: 0.8;
+  font-weight: 500;
+  letter-spacing: -0.05em;
+  font-variant-numeric: tabular-nums;
+  counter-reset: load var(--load);
+  animation: preloader-count 0.8s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+.preloader__count::before {
+  content: counter(load);
+}
+
+.preloader__bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--color-lime);
+  transform-origin: left;
+  transform: scaleX(0);
+  animation: preloader-bar 0.8s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+.preloader__mark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  opacity: 0;
+  animation: fade-in 0.4s var(--ease-out) 0.1s forwards;
+}
+
+@keyframes preloader-count {
+  to {
+    --load: 100;
+  }
+}
+@keyframes preloader-bar {
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes preloader-out {
+  to {
+    transform: translateY(-100%);
+    visibility: hidden;
+  }
+}
+@keyframes fade-in {
+  to {
+    opacity: 1;
+  }
+}
+
+/* ───────────────────────────── Hero intro (CSS, runs without JS) ───────────────────────────── */
+
+.reveal-line {
+  display: block;
+  overflow: clip;
+  overflow-clip-margin: 0.12em;
+  padding-bottom: 0.06em;
+  margin-bottom: -0.06em;
+}
+
+.reveal-word {
+  display: inline-block;
+  transform: translateY(105%);
+  animation: rise var(--duration-4) var(--ease-out) forwards;
+  animation-delay: calc(0.95s + var(--i, 0) * 0.08s);
+}
+
+.fade-up {
+  opacity: 0;
+  transform: translateY(24px);
+  animation: fade-up var(--duration-3) var(--ease-out) forwards;
+  animation-delay: calc(1.15s + var(--i, 0) * 0.08s);
+}
+
+@keyframes rise {
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes fade-up {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ───────────────────────────── Marquee ───────────────────────────── */
+
+.marquee__track {
+  display: flex;
+  width: max-content;
+  animation: marquee 38s linear infinite;
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* ───────────────────────────── Network topology ───────────────────────────── */
+
+.packet {
+  offset-rotate: 0deg;
+  animation: packet 3.6s var(--ease-in-out) infinite;
+  animation-delay: var(--d, 0s);
+}
+
+@keyframes packet {
+  0% {
+    offset-distance: 0%;
+    opacity: 0;
+  }
+  10%,
+  90% {
+    opacity: 1;
+  }
+  100% {
+    offset-distance: 100%;
+    opacity: 0;
+  }
+}
+
+.pulse-ring {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pulse 2.8s var(--ease-out) infinite;
+  animation-delay: var(--d, 0s);
+}
+
+@keyframes pulse {
+  from {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(3.2);
+    opacity: 0;
+  }
+}
+
+/* ───────────────────────────── Toolkit topology ───────────────────────────── */
+
+.topo-node {
+  transition: opacity var(--duration-2) var(--ease-out);
+}
+
+.topo-dot {
+  transition: fill var(--duration-2) var(--ease-out);
+}
+
+.toolkit:has([data-group]:hover) .topo-node {
+  opacity: 0.25;
+}
+
+.toolkit:has([data-group="programming"]:hover) [data-node="programming"] {
+  opacity: 1;
+}
+.toolkit:has([data-group="programming"]:hover) [data-node="programming"] .topo-dot {
+  fill: var(--color-lime);
+}
+
+.toolkit:has([data-group="data"]:hover) [data-node="data"] {
+  opacity: 1;
+}
+.toolkit:has([data-group="data"]:hover) [data-node="data"] .topo-dot {
+  fill: var(--color-lime);
+}
+
+.toolkit:has([data-group="web"]:hover) [data-node="web"] {
+  opacity: 1;
+}
+.toolkit:has([data-group="web"]:hover) [data-node="web"] .topo-dot {
+  fill: var(--color-lime);
+}
+
+.toolkit:has([data-group="networking"]:hover) [data-node="networking"] {
+  opacity: 1;
+}
+.toolkit:has([data-group="networking"]:hover) [data-node="networking"] .topo-dot {
+  fill: var(--color-lime);
+}
+
+.toolkit:has([data-group="tools"]:hover) [data-node="tools"] {
+  opacity: 1;
+}
+.toolkit:has([data-group="tools"]:hover) [data-node="tools"] .topo-dot {
+  fill: var(--color-lime);
+}
+
+/* ───────────────────────────── Custom cursor ───────────────────────────── */
+
+.cursor-dot,
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 90;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--duration-2) var(--ease-out);
+}
+
+html[data-cursor="on"] .cursor-dot,
+html[data-cursor="on"] .cursor-ring {
+  opacity: 1;
+}
+
+.cursor-dot {
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border-radius: 50%;
+  background: var(--color-lime);
+}
+
+.cursor-dot[data-state="hide"] {
+  opacity: 0 !important;
+}
+
+.cursor-ring {
+  width: 40px;
+  height: 40px;
+  margin: -20px 0 0 -20px;
+}
+
+.cursor-ring::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid rgb(238 243 234 / 0.5);
+  transition:
+    transform var(--duration-2) var(--ease-out),
+    background-color var(--duration-2) var(--ease-out),
+    border-color var(--duration-2) var(--ease-out);
+}
+
+.cursor-ring[data-state="link"]::before {
+  transform: scale(1.5);
+  border-color: var(--color-lime);
+  background: rgb(198 244 50 / 0.12);
+}
+
+.cursor-ring[data-state="view"]::before {
+  transform: scale(2.3);
+  border-color: transparent;
+  background: var(--color-lime);
+}
+
+.cursor-ring[data-press="true"]::before {
+  transform: scale(0.8);
+}
+
+.cursor-label {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--color-ink);
+  opacity: 0;
+  transform: scale(0.6);
+  transition:
+    opacity var(--duration-1) var(--ease-out),
+    transform var(--duration-2) var(--ease-out);
+}
+
+.cursor-ring[data-state="view"] .cursor-label {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ───────────────────────────── Horizontal work track ───────────────────────────── */
+
+.hscroll-viewport {
+  overflow-x: auto;
+  scroll-padding-inline: var(--edge);
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-strong) transparent;
+}
+
+.hscroll-viewport > * > * {
+  scroll-snap-align: start;
+}
+
+.is-enhanced .hscroll-viewport {
+  overflow: visible;
+  scroll-snap-type: none;
+}
+
+.bloom-petals {
+  transition: transform var(--duration-4) var(--ease-out);
+}
+
+a:hover .bloom-petals,
+.bloom-hover:hover .bloom-petals {
+  transform: rotate(30deg);
+}
+
+html.has-cursor,
+html.has-cursor * {
+  cursor: none !important;
+}
+
+html.has-cursor input,
+html.has-cursor textarea {
+  cursor: text !important;
+}
+
+/* ───────────────────────────── Reduced motion ───────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  html:not(.lenis) {
+    scroll-behavior: auto;
+  }
+
+  .preloader {
+    display: none;
+  }
+
+  .reveal-word,
+  .fade-up {
+    animation: none;
+    transform: none;
+    opacity: 1;
+  }
+
+  .marquee__track,
+  .packet,
+  .pulse-ring {
+    animation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
+}
